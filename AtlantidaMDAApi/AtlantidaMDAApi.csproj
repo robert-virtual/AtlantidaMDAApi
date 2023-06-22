@@ -208,6 +208,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AuthController.cs" />
+    <Compile Include="Models\ErrorRes.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Models\Notificacion.cs" />
     <Compile Include="Models\Mensaje.cs" />

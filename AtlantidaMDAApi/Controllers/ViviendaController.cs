@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -25,6 +26,26 @@ namespace AtlantidaMDAApi.Controllers
             // TODO: retornar resultado
 
             return Request.CreateResponse(HttpStatusCode.Created, req);
+        }
+        [HttpPost]
+        public async Task<HttpResponseMessage> documentacionCotizacion()
+        {
+            if (!Request.Content.IsMimeMultipartContent())
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new ErrorRes() { error = "Header 'content-type' erroneo el header debe tener el valor de 'multipart/form-data'" });
+            }
+            var provider = new MultipartMemoryStreamProvider();
+            await Request.Content.ReadAsMultipartAsync(provider);
+            List<string> base64Files = new List<string>();
+            foreach (var file in provider.Contents)
+            {
+                //var filename = file.Headers.ContentDisposition.FileName;
+                var binaryFileData = await file.ReadAsByteArrayAsync();
+                base64Files.Add(Convert.ToBase64String(binaryFileData));
+
+            }
+            return Request.CreateResponse(HttpStatusCode.OK, base64Files);
+
         }
         // POST: api/Vivienda
         [HttpPost]
