@@ -2,10 +2,12 @@
 using AtlantidaMDAApi.Models;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Web.Routing;
@@ -20,8 +22,11 @@ namespace AtlantidaMDAApi.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("login")]
-        public HttpResponseMessage login([FromBody] Credentials credentials)
+        public HttpResponseMessage login([FromBody] string encryptedData)
         {
+
+            string decryptedData = Crypto.decrypt(encryptedData);
+            Credentials credentials = JsonSerializer.Deserialize<Credentials>(decryptedData);
             if (credentials.username != "rober" || credentials.password != "pass")
             {
                 return Request.CreateResponse(
@@ -29,24 +34,28 @@ namespace AtlantidaMDAApi.Controllers
                     new LoginRes() { error = "Credenciales incorrectas" }
                 );
             }
+
+            //CotizarViviendaReq
+            string json = JsonSerializer.Serialize(new LoginRes()
+            {
+                user = new User()
+                {
+                    username = credentials.username
+                },
+                token = JWT.generateToken(credentials.username)
+            });
             return Request.CreateResponse(
                 HttpStatusCode.OK,
-                new LoginRes()
-                {
-                    user = new User()
-                    {
-                        username = credentials.username
-                    },
-                    token = JWT.generateToken(credentials.username)
-                }
+                Crypto.encrypt(json)
+
             );
         }
 
         [HttpGet]
         [Route("check-token")]
-        public bool checkToken()
+        public string checkToken()
         {
-            return true;
+            return Crypto.encrypt("true");
         }
 
     }

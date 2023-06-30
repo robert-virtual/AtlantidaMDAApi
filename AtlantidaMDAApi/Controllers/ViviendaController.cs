@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
@@ -17,15 +18,20 @@ namespace AtlantidaMDAApi.Controllers
 
         // POST: api/Vivienda
         [HttpPost]
-        public HttpResponseMessage cotizar([FromBody] CotizarViviendaReq req)
+        public HttpResponseMessage cotizar([FromBody] string encryptedData)
         {
             // TODO: encriptar peticion
             // TODO: enviar peticion a servicio SOAP
 
             // TODO: desencriptar respuesta
             // TODO: retornar resultado
+            string decryptedData = Crypto.decrypt(encryptedData);
+            //CotizarViviendaReq
+            CotizarViviendaReq req = JsonSerializer.Deserialize<CotizarViviendaReq>(decryptedData);
 
-            return Request.CreateResponse(HttpStatusCode.Created, req);
+            string json = JsonSerializer.Serialize(req);
+
+            return Request.CreateResponse(HttpStatusCode.Created, Crypto.encrypt(json));
         }
         [HttpPost]
         public async Task<HttpResponseMessage> documentacionCotizacion()
@@ -48,6 +54,9 @@ namespace AtlantidaMDAApi.Controllers
 
         }
         // POST: api/Vivienda
+
+
+
         [HttpPost]
         public HttpResponseMessage cotizarEncrypted([FromBody] string encryptedData)
         {
@@ -59,6 +68,9 @@ namespace AtlantidaMDAApi.Controllers
             // TODO: retornar resultado
             return Request.CreateResponse(HttpStatusCode.Created, decryptedData);
         }
+
+
+
         [HttpGet]
         public HttpResponseMessage GetSolicitudesCotizadas()
         {
